@@ -1,0 +1,77 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: agentx-daily-reports
+  namespace: agentx
+spec:
+  schedule: "0 9 * * *"  # Daily at 9 AM
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          nodeSelector:
+            node-pool: worker
+          containers:
+          - name: reporter
+            image: agentx/marketplace:latest
+            command:
+            - node
+            - -e
+            - |
+              const { generateDailyReports } = require('./lib/jobs/reports');
+              generateDailyReports().then(() => process.exit(0));
+            env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: agentx-secrets
+                  key: database-url
+            resources:
+              requests:
+                memory: "256Mi"
+                cpu: "100m"
+              limits:
+                memory: "512Mi"
+                cpu: "200m"
+          restartPolicy: OnFailure
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: agentx-weekly-payouts
+  namespace: agentx
+spec:
+  schedule: "0 0 * * 0"  # Weekly on Sunday
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          nodeSelector:
+            node-pool: worker
+          containers:
+          - name: payout
+            image: agentx/marketplace:latest
+            command:
+            - node
+            - -e
+            - |
+              const { processWeeklyPayouts } = require('./lib/jobs/payouts');
+              processWeeklyPayouts().then(() => process.exit(0));
+            env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: agentx-secrets
+                  key: database-url
+            - name: STRIPE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: agentx-secrets
+                  key: stripe-secret-key
+            resources:
+              requests:
+                memory: "256Mi"
+                cpu: "100m"
+          restartPolicy: OnFailure

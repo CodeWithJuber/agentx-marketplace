@@ -3,7 +3,9 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: 'export',
-  distDir: 'dist',
+  distDir: 'docs',
+  basePath: '/agentx-marketplace',
+  assetPrefix: '/agentx-marketplace',
   images: {
     unoptimized: true,
   },

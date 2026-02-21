@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agentx-app
+  namespace: agentx
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: agentx
+  template:
+    metadata:
+      labels:
+        app: agentx
+    spec:
+      containers:
+      - name: app
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: html
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: html
+        configMap:
+          name: agentx-html
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: agentx-html
+  namespace: agentx
+data:
+  index.html: "<!DOCTYPE html><html><head><title>AgentX</title><style>body{font-family:Arial,sans-serif;background:#0a0a0a;color:white;text-align:center;padding:50px}h1{font-size:3em;background:linear-gradient(90deg,#0ea5e9,#d946ef);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.status{padding:20px;background:#1a1a1a;border-radius:10px;margin:20px auto;max-width:600px}.ip{font-family:monospace;background:#333;padding:10px;border-radius:5px}</style></head><body><h1>AgentX Deployed!</h1><div class='status'><h2>✅ Cluster Running</h2><p><strong>IP:</strong> <span class='ip'>172.234.12.25</span></p><p><strong>Cluster ID:</strong> 571445</p><p><strong>Nodes:</strong> 4 (2 App + 2 Worker)</p><p><strong>GitHub:</strong> github.com/CodeWithJuber/agentx-marketplace</p></div></body></html>"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agentx-app
+  namespace: agentx
+spec:
+  selector:
+    app: agentx
+  ports:
+  - port: 80
+    targetPort: 80

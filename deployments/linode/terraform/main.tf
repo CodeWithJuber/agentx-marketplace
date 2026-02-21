@@ -22,7 +22,7 @@ provider "linode" {
 # Create LKE Cluster
 resource "linode_lke_cluster" "agentx" {
   label       = var.cluster_name
-  k8s_version = "1.29"
+  k8s_version = "1.34"
   region      = var.region
   
   tags = ["agentx", "production"]
@@ -31,22 +31,12 @@ resource "linode_lke_cluster" "agentx" {
   pool {
     type  = var.app_node_type
     count = var.app_node_count
-    
-    autoscaler {
-      min_nodes = 2
-      max_nodes = 5
-    }
   }
 
   # Worker node pool - background jobs, queues
   pool {
     type  = var.worker_node_type
     count = var.worker_node_count
-    
-    autoscaler {
-      min_nodes = 1
-      max_nodes = 5
-    }
   }
 
   # GPU node pool - AI inference (optional)

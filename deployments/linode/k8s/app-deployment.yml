@@ -13,26 +13,45 @@ spec:
       labels:
         app: agentx
     spec:
+      initContainers:
+      - name: builder
+        image: node:20-alpine
+        workingDir: /app
+        command:
+        - sh
+        - -c
+        - |
+          npm install --legacy-peer-deps
+          npm run build
+          cp -r .next/standalone/* /output/
+          cp -r public /output/ 2>/dev/null || true
+        volumeMounts:
+        - name: app-code
+          mountPath: /app
+        - name: output
+          mountPath: /output
       containers:
       - name: app
-        image: nginx:alpine
+        image: node:20-alpine
+        workingDir: /app
+        command: ["node", "server.js"]
         ports:
-        - containerPort: 80
+        - containerPort: 3000
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "3000"
         volumeMounts:
-        - name: html
-          mountPath: /usr/share/nginx/html
+        - name: output
+          mountPath: /app
       volumes:
-      - name: html
-        configMap:
-          name: agentx-html
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: agentx-html
-  namespace: agentx
-data:
-  index.html: "<!DOCTYPE html><html><head><title>AgentX</title><style>body{font-family:Arial,sans-serif;background:#0a0a0a;color:white;text-align:center;padding:50px}h1{font-size:3em;background:linear-gradient(90deg,#0ea5e9,#d946ef);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.status{padding:20px;background:#1a1a1a;border-radius:10px;margin:20px auto;max-width:600px}.ip{font-family:monospace;background:#333;padding:10px;border-radius:5px}</style></head><body><h1>AgentX Deployed!</h1><div class='status'><h2>✅ Cluster Running</h2><p><strong>IP:</strong> <span class='ip'>172.234.12.25</span></p><p><strong>Cluster ID:</strong> 571445</p><p><strong>Nodes:</strong> 4 (2 App + 2 Worker)</p><p><strong>GitHub:</strong> github.com/CodeWithJuber/agentx-marketplace</p></div></body></html>"
+      - name: app-code
+        hostPath:
+          path: /root/.openclaw/workspace/viral-product
+          type: Directory
+      - name: output
+        emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
@@ -44,4 +63,4 @@ spec:
     app: agentx
   ports:
   - port: 80
-    targetPort: 80
+    targetPort: 3000

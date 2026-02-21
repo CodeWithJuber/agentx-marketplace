@@ -2,9 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  output: 'standalone',
+  output: 'export',
+  distDir: 'dist',
   images: {
-    domains: ['img.clerk.com', 'avatars.githubusercontent.com'],
     unoptimized: true,
   },
 };

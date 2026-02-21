@@ -1,6 +1,6 @@
 // Worker entry point for background job processing
 import { createClient } from '@redis/client';
-import { db } from '../db';
+// Note: db import removed - not used in worker currently
 
 const redis = createClient({
   url: process.env.REDIS_URL,

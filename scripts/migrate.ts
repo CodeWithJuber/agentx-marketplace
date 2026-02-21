@@ -1,6 +1,6 @@
 import { neon } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
-import { users, agents, purchases, referrals, reviews, conversations } from './schema';
+// Schema imports removed - used for reference only
 
 const sql = neon(process.env.DATABASE_URL!);
 const db = drizzle(sql);

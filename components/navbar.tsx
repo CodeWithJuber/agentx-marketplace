@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
+import { SignedIn, SignedOut, UserButton } from '@/components/mock-clerk';
 import { Bot, Sparkles, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 
@@ -45,7 +45,7 @@ export function Navbar() {
               <Link href="/dashboard" className="btn-primary hidden sm:block">
                 Dashboard
               </Link>
-              <UserButton afterSignOutUrl="/" />
+              <UserButton />
             </SignedIn>
             <button
               className="md:hidden p-2"
